@@ -1,11 +1,15 @@
 import logging
 from typing import Optional
 
+from ..models.contracts import AgentRequest, AgentResponse
+from .irrigation import IrrigationAgent
+
 logger = logging.getLogger(__name__)
 
 class IntentRouter:
-    def __init__(self):
+    def __init__(self, irrigation_agent: Optional[IrrigationAgent] = None):
         self.supported_intents = ["irrigation", "spoilage", "climate", "subsidy", "market_price"]
+        self.irrigation_agent = irrigation_agent
         
         # Simple keyword matching for MVP routing
         self.keywords = {
@@ -44,4 +48,24 @@ class IntentRouter:
             "5. Market prices"
         )
 
-intent_router = IntentRouter()
+    async def route_request(self, request: AgentRequest) -> AgentResponse:
+        """
+        Routes the request to the appropriate agent based on intent.
+        """
+        intent = self.classify_intent(request.query_text)
+        
+        if intent == "irrigation" and self.irrigation_agent:
+            return await self.irrigation_agent.process_request(request)
+            
+        # Fallback for unimplemented agents or unclassified
+        text = self.get_fallback_menu(request.language)
+        return AgentResponse(
+            text=text,
+            agent_name="IntentRouter",
+            intent=intent,
+            safe_fallback=True
+        )
+
+# Note: The global instance is commented out because it requires dependencies.
+# We will likely inject dependencies in the FastAPI routes.
+# intent_router = IntentRouter()
