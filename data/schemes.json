@@ -1,0 +1,32 @@
+[
+  {
+    "scheme_name": "PM-KISAN",
+    "scope": "national",
+    "eligible_crops": ["all"],
+    "land_size_rules": {
+      "max_hectares": null,
+      "description": "All landholding farmers subject to exclusion criteria"
+    },
+    "category_rules": ["all"],
+    "benefit_description": "₹6,000 per year in three equal installments",
+    "next_action": "Ensure Aadhaar is linked to bank account and register on pmkisan.gov.in or CSC",
+    "official_source_url": "https://pmkisan.gov.in/",
+    "last_updated_date": "2024-01-01",
+    "dataset_version": "v1.0"
+  },
+  {
+    "scheme_name": "PMFBY (Pradhan Mantri Fasal Bima Yojana)",
+    "scope": "national",
+    "eligible_crops": ["food crops", "oilseeds", "annual commercial/horticultural crops"],
+    "land_size_rules": {
+      "max_hectares": null,
+      "description": "No limit"
+    },
+    "category_rules": ["all"],
+    "benefit_description": "Comprehensive insurance cover against failure of the crop",
+    "next_action": "Apply through bank, CSC, or pmfby.gov.in before the cutoff date",
+    "official_source_url": "https://pmfby.gov.in/",
+    "last_updated_date": "2024-01-01",
+    "dataset_version": "v1.0"
+  }
+]
