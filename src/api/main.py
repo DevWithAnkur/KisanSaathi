@@ -1,5 +1,6 @@
 from fastapi import FastAPI
 from src.core.config import settings
+from src.api.webhook import router as webhook_router
 import logging
 
 logging.basicConfig(level=settings.log_level)
@@ -11,6 +12,7 @@ app = FastAPI(
     version="0.1.0",
 )
 
+app.include_router(webhook_router)
 
 @app.get("/health")
 async def health_check():
