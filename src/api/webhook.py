@@ -5,7 +5,7 @@ import json
 import logging
 
 from src.core.config import settings
-from src.core.security import verify_whatsapp_signature, sanitize_input
+from src.core.security import verify_whatsapp_signature, sanitize_input, contains_profanity
 from src.core.rate_limit import rate_limiter
 from src.core.session import session_manager
 from src.agents.router import intent_router
@@ -81,8 +81,12 @@ async def receive_message(
     else:
         return {"status": "ok", "detail": "Unsupported message type"}
 
-    # 5. Sanitize
+    # 5. Sanitize & Profanity Check
     sanitized_text = sanitize_input(query_text)
+    if contains_profanity(sanitized_text):
+        logger.warning(f"Profanity detected from {farmer_id}")
+        # In a real app, send a polite refusal via WhatsApp API
+        return {"status": "ok", "detail": "Profanity detected. Message rejected."}
 
     # 6. Classify Intent
     intent = intent_router.classify_intent(sanitized_text)

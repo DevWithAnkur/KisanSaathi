@@ -34,3 +34,21 @@ def sanitize_input(text: Optional[str]) -> str:
     clean_text = re.sub(r'<[^>]+>', '', clean_text)
     
     return clean_text.strip()
+
+# MVP basic static list
+BANNED_WORDS = {
+    "abuse", "curse", "swear", "idiot", "stupid", "dumb", # English
+    "pagal", "gadha", "kutta", "kaminey",                 # Hindi transliterated
+    "मूर्ख", "पागल", "बेवकूफ"                               # Hindi native
+}
+
+def contains_profanity(text: str) -> bool:
+    """
+    Checks if the transcribed text contains basic profanity or abusive language (FR-28).
+    """
+    text_lower = text.lower()
+    # Simple substring or word match
+    for word in BANNED_WORDS:
+        if re.search(r'\b' + re.escape(word) + r'\b', text_lower):
+            return True
+    return False
