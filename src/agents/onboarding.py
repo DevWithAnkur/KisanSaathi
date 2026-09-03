@@ -26,6 +26,7 @@ class OnboardingAgent:
                 text = "Thank you. To provide accurate weather and market data, which state and district are you from? (e.g., 'Maharashtra, Pune')" if request.language != "hi" else "धन्यवाद। सटीक मौसम और बाजार डेटा प्रदान करने के लिए, आप किस राज्य और जिले से हैं? (उदा., 'महाराष्ट्र, पुणे')"
                 return self._build_response(request, text)
             elif "no" in text_lower or "नहीं" in text_lower or "nahi" in text_lower:
+                profile.consent_given = False
                 text = "I respect your privacy. Without consent to process your voice and location, I cannot provide advisories. Have a good day." if request.language != "hi" else "मैं आपकी गोपनीयता का सम्मान करता हूँ। आपकी आवाज़ और स्थान को संसाधित करने की सहमति के बिना, मैं सलाह प्रदान नहीं कर सकता।"
                 return self._build_response(request, text)
             else:

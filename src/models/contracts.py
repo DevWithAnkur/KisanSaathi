@@ -25,3 +25,15 @@ class AgentResponse(BaseModel):
     cache_status: str = Field(default="miss", description="'hit' or 'miss'")
     cache_age_seconds: Optional[int] = Field(default=None, description="Age of cached data if cache_status is 'hit'")
     safe_fallback: bool = Field(default=False, description="True if response is a safe fallback due to error")
+
+
+# Compatibility models for callers using the original climate contract names.
+class ForecastData(BaseModel):
+    max_temperature_c: Optional[float] = None
+    total_rainfall_48h_mm: float = 0.0
+
+
+class WeatherData(BaseModel):
+    forecast: ForecastData
+    source: str
+    retrieved_at: datetime = Field(default_factory=datetime.utcnow)

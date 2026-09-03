@@ -1,4 +1,5 @@
 import logging
+import inspect
 from typing import Optional
 
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -116,11 +117,15 @@ class IntentRouter:
         # Caching logic
         if response and not getattr(response, 'safe_fallback', False) and getattr(response, 'verification_status', None) != "failed":
             # Successful response, cache it
-            await cache.set_last_advisory(request.farmer_id, intent, response.text)
+            cache_result = cache.set_last_advisory(request.farmer_id, intent, response.text)
+            if inspect.isawaitable(cache_result):
+                await cache_result
             return response
             
         # If response failed or exception occurred, try to fallback to cache
-        cached_text = await cache.get_last_advisory(request.farmer_id, intent)
+        cached_text = cache.get_last_advisory(request.farmer_id, intent)
+        if inspect.isawaitable(cached_text):
+            cached_text = await cached_text
         if cached_text:
             return AgentResponse(
                 text=f"(Offline Fallback) {cached_text}",
@@ -141,6 +146,4 @@ class IntentRouter:
             safe_fallback=True
         )
 
-# Note: The global instance is commented out because it requires dependencies.
-# We will likely inject dependencies in the FastAPI routes.
-# intent_router = IntentRouter()
+intent_router = IntentRouter()

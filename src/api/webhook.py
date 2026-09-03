@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Request, HTTPException, Depends, Header
+from fastapi import APIRouter, Request, HTTPException, Depends, Header, Query
 from fastapi.responses import PlainTextResponse
 from typing import Any, Dict
 import json
@@ -18,9 +18,9 @@ router = APIRouter(prefix="/webhook", tags=["Webhook"])
 
 @router.get("")
 async def verify_webhook(
-    "hub.mode": str = None, 
-    "hub.challenge": str = None, 
-    "hub.verify_token": str = None
+    hub_mode: str = Query(None, alias="hub.mode"), 
+    hub_challenge: str = Query(None, alias="hub.challenge"), 
+    hub_verify_token: str = Query(None, alias="hub.verify_token")
 ):
     """
     Endpoint for Meta to verify the webhook URL.

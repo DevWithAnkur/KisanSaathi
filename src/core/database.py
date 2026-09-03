@@ -1,12 +1,12 @@
 import logging
 from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker, AsyncSession
 from sqlalchemy.orm import declarative_base
+from src.core.config import settings
 
 logger = logging.getLogger(__name__)
 
-# Using an environment variable or default
-# Format: postgresql+asyncpg://user:password@host:port/dbname
-DATABASE_URL = "postgresql+asyncpg://postgres:postgres@localhost:5432/kisansaathi"
+# asyncpg requires the driver-specific PostgreSQL URL scheme.
+DATABASE_URL = settings.database_url.replace("postgresql://", "postgresql+asyncpg://", 1)
 
 try:
     engine = create_async_engine(DATABASE_URL, echo=False)
