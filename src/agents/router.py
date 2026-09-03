@@ -3,13 +3,15 @@ from typing import Optional
 
 from ..models.contracts import AgentRequest, AgentResponse
 from .irrigation import IrrigationAgent
+from .spoilage import SpoilageAgent
 
 logger = logging.getLogger(__name__)
 
 class IntentRouter:
-    def __init__(self, irrigation_agent: Optional[IrrigationAgent] = None):
+    def __init__(self, irrigation_agent: Optional[IrrigationAgent] = None, spoilage_agent: Optional[SpoilageAgent] = None):
         self.supported_intents = ["irrigation", "spoilage", "climate", "subsidy", "market_price"]
         self.irrigation_agent = irrigation_agent
+        self.spoilage_agent = spoilage_agent
         
         # Simple keyword matching for MVP routing
         self.keywords = {
@@ -56,6 +58,9 @@ class IntentRouter:
         
         if intent == "irrigation" and self.irrigation_agent:
             return await self.irrigation_agent.process_request(request)
+            
+        if intent == "spoilage" and self.spoilage_agent:
+            return await self.spoilage_agent.process_request(request)
             
         # Fallback for unimplemented agents or unclassified
         text = self.get_fallback_menu(request.language)
