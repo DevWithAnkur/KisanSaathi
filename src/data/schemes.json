@@ -1,0 +1,26 @@
+[
+  {
+    "name": "PM-KISAN",
+    "state_scope": "national",
+    "eligible_crops": [],
+    "max_land_size_ha": 2.0,
+    "categories": ["small", "marginal"],
+    "benefit": "₹6,000 per year paid in three equal installments",
+    "next_action": "Visit your nearest CSC with your Aadhaar and land record to register",
+    "source": "PM-KISAN portal (pmkisan.gov.in)",
+    "last_updated": "2026-08-01T00:00:00Z",
+    "dataset_version": "1.0"
+  },
+  {
+    "name": "PMFBY (Crop Insurance)",
+    "state_scope": "national",
+    "eligible_crops": ["wheat", "rice", "cotton", "soybean"],
+    "max_land_size_ha": null,
+    "categories": ["all", "small", "marginal"],
+    "benefit": "Insurance cover against crop failure due to natural calamities",
+    "next_action": "Enroll through your bank branch, CSC, or pmfby.gov.in before the sowing season deadline",
+    "source": "PMFBY portal (pmfby.gov.in)",
+    "last_updated": "2026-08-01T00:00:00Z",
+    "dataset_version": "1.0"
+  }
+]
