@@ -4,6 +4,7 @@ from typing import Optional
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
 
+from ..core.cache import cache
 from ..models.contracts import AgentRequest, AgentResponse
 from ..models.profile_db import FarmerProfileDB
 from .irrigation import IrrigationAgent
@@ -89,18 +90,43 @@ class IntentRouter:
                     "harvest_date": profile.harvest_date
                 }
         
-        if intent == "irrigation" and self.irrigation_agent:
-            return await self.irrigation_agent.process_request(request)
+        # Standard agent routing
+        response = None
+        try:
+            if intent == "irrigation" and self.irrigation_agent:
+                response = await self.irrigation_agent.process_request(request)
+                
+            elif intent == "spoilage" and self.spoilage_agent:
+                response = await self.spoilage_agent.process_request(request)
+                
+            elif intent == "subsidy" and self.subsidy_agent:
+                response = await self.subsidy_agent.process_request(request)
+                
+            elif intent == "market_price" and self.market_price_agent:
+                response = await self.market_price_agent.process_request(request)
+                
+        except Exception as e:
+            logger.error(f"Agent processing failed for {intent}: {e}")
+
+        # Caching logic
+        if response and not getattr(response, 'safe_fallback', False) and getattr(response, 'verification_status', None) != "failed":
+            # Successful response, cache it
+            await cache.set_last_advisory(request.farmer_id, intent, response.text)
+            return response
             
-        if intent == "spoilage" and self.spoilage_agent:
-            return await self.spoilage_agent.process_request(request)
+        # If response failed or exception occurred, try to fallback to cache
+        cached_text = await cache.get_last_advisory(request.farmer_id, intent)
+        if cached_text:
+            return AgentResponse(
+                text=f"(Offline Fallback) {cached_text}",
+                agent_name="CacheFallback",
+                intent=intent,
+                safe_fallback=True
+            )
             
-        if intent == "subsidy" and self.subsidy_agent:
-            return await self.subsidy_agent.process_request(request)
-            
-        if intent == "market_price" and self.market_price_agent:
-            return await self.market_price_agent.process_request(request)
-            
+        if response:
+            return response
+
         # Fallback for unimplemented agents or unclassified
         text = self.get_fallback_menu(request.language)
         return AgentResponse(
