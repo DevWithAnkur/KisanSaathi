@@ -1,21 +1,27 @@
 import logging
 from typing import Optional
 
+from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.future import select
+
 from ..models.contracts import AgentRequest, AgentResponse
+from ..models.profile_db import FarmerProfileDB
 from .irrigation import IrrigationAgent
 from .spoilage import SpoilageAgent
 from .subsidy import SubsidyAgent
 from .market_price import MarketPriceAgent
+from .onboarding import OnboardingAgent
 
 logger = logging.getLogger(__name__)
 
 class IntentRouter:
-    def __init__(self, irrigation_agent: Optional[IrrigationAgent] = None, spoilage_agent: Optional[SpoilageAgent] = None, subsidy_agent: Optional[SubsidyAgent] = None, market_price_agent: Optional[MarketPriceAgent] = None):
+    def __init__(self, irrigation_agent: Optional[IrrigationAgent] = None, spoilage_agent: Optional[SpoilageAgent] = None, subsidy_agent: Optional[SubsidyAgent] = None, market_price_agent: Optional[MarketPriceAgent] = None, onboarding_agent: Optional[OnboardingAgent] = None):
         self.supported_intents = ["irrigation", "spoilage", "climate", "subsidy", "market_price"]
         self.irrigation_agent = irrigation_agent
         self.spoilage_agent = spoilage_agent
         self.subsidy_agent = subsidy_agent
         self.market_price_agent = market_price_agent
+        self.onboarding_agent = onboarding_agent
         
         # Simple keyword matching for MVP routing
         self.keywords = {
@@ -54,11 +60,34 @@ class IntentRouter:
             "5. Market prices"
         )
 
-    async def route_request(self, request: AgentRequest) -> AgentResponse:
+    async def process_request(self, intent: str, request: AgentRequest, db: AsyncSession = None) -> AgentResponse:
         """
-        Routes the request to the appropriate agent based on intent.
+        Routes the request to the appropriate agent after handling onboarding.
         """
-        intent = self.classify_intent(request.query_text)
+        profile = None
+        if db:
+            result = await db.execute(select(FarmerProfileDB).filter(FarmerProfileDB.phone_number == request.farmer_id))
+            profile = result.scalars().first()
+            
+            if not profile:
+                profile = FarmerProfileDB(phone_number=request.farmer_id)
+                db.add(profile)
+                await db.commit()
+                await db.refresh(profile)
+                
+            if profile.onboarding_step != "complete" and self.onboarding_agent:
+                return await self.onboarding_agent.process_request(request, db, profile)
+                
+            # If onboarding is complete, populate request profile with decrypted data
+            if profile.onboarding_step == "complete":
+                request.profile = {
+                    "state": profile.state,
+                    "district": profile.district,
+                    "crop": profile.crop,
+                    "land_size_ha": float(profile.land_size_ha) if profile.land_size_ha else None,
+                    "category": profile.category,
+                    "harvest_date": profile.harvest_date
+                }
         
         if intent == "irrigation" and self.irrigation_agent:
             return await self.irrigation_agent.process_request(request)
