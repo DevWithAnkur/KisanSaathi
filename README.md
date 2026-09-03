@@ -106,6 +106,48 @@ flowchart TD
 - **Transient Audio**: Voice notes are strictly used for transcription and deleted immediately following successful processing.
 - **Offline Resilience**: Last-received advisories are cached locally/in Redis, ensuring farmers can retrieve guidance even during connectivity drops.
 
+## 🏗️ Architecture Decisions
+
+Throughout the implementation of KisanSaathi, the following key architectural decisions were made:
+
+1. **Agentic Router Model**: Instead of one monolithic LLM, we implemented an `IntentRouter` that classifies intent and delegates to specific specialized agents (`OnboardingAgent`, `IrrigationAgent`, `SpoilageAgent`, `SubsidyAgent`, `MarketPriceAgent`, `ClimateAgent`). This isolates prompt logic and limits hallucinations.
+2. **Encryption at Rest**: The `FarmerProfileDB` utilizes a custom SQLAlchemy `TypeDecorator` combined with `cryptography.fernet` to symmetrically encrypt PII (like location and land size) directly at the application layer before it hits PostgreSQL.
+3. **Offline Resilience**: A `RedisCache` layer intercepts successful agent responses. If an external API fails (like the Weather API), the router falls back to the cache to ensure the farmer still receives a response.
+4. **Data Hygiene**: Voice notes are meant to be strictly ephemeral. To enforce this, we designed S3 lifecycle policies (`scripts/setup_s3_lifecycle.json`) to auto-delete objects after 1 day.
+5. **Language Flexibility**: Instead of hardcoding all translations, we introduced a `TranslationClient` with a domain-specific `agri_glossary.json`. It attempts a translation API call and falls back to English if it fails, ensuring the system never crashes due to a language API outage.
+
+## 🔌 API Endpoints & Payloads
+
+The system relies on external webhooks from communication providers.
+
+### 1. WhatsApp Webhook (`/webhook`)
+Handles incoming messages from the Meta WhatsApp Cloud API.
+- **Method**: `POST`
+- **Security**: Validates the `X-Hub-Signature-256` HMAC header.
+- **Payload Structure** (Simplified):
+  ```json
+  {
+    "entry": [{
+      "changes": [{
+        "value": {
+          "messages": [{
+            "from": "919876543210",
+            "id": "wamid.HBg...",
+            "type": "text",
+            "text": {"body": "will my crop spoil?"}
+          }]
+        }
+      }]
+    }]
+  }
+  ```
+
+### 2. Twilio IVR Fallback (`/ivr/incoming` & `/ivr/process`)
+Provides a voice-call alternative for feature-phone users.
+- **Method**: `POST`
+- **Payload Structure**: Standard `application/x-www-form-urlencoded` from Twilio containing `From` (Caller ID) and `SpeechResult` (Transcribed speech).
+- **Response**: TwiML XML using the `<Say>` and `<Gather>` verbs.
+
 ## 🛠️ Technology Stack
 
 - **Primary Interface**: WhatsApp Business API (Cloud API, Meta), Twilio / Exotel (IVR Fallback)
