@@ -1,0 +1,14 @@
+{
+    "Rules": [
+        {
+            "ID": "AutoDeleteVoiceNotes",
+            "Filter": {
+                "Prefix": "voice_notes/"
+            },
+            "Status": "Enabled",
+            "Expiration": {
+                "Days": 1
+            }
+        }
+    ]
+}
