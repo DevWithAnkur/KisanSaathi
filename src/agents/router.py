@@ -12,17 +12,19 @@ from .spoilage import SpoilageAgent
 from .subsidy import SubsidyAgent
 from .market_price import MarketPriceAgent
 from .onboarding import OnboardingAgent
+from .climate import ClimateAgent
 
 logger = logging.getLogger(__name__)
 
 class IntentRouter:
-    def __init__(self, irrigation_agent: Optional[IrrigationAgent] = None, spoilage_agent: Optional[SpoilageAgent] = None, subsidy_agent: Optional[SubsidyAgent] = None, market_price_agent: Optional[MarketPriceAgent] = None, onboarding_agent: Optional[OnboardingAgent] = None):
+    def __init__(self, irrigation_agent: Optional[IrrigationAgent] = None, spoilage_agent: Optional[SpoilageAgent] = None, subsidy_agent: Optional[SubsidyAgent] = None, market_price_agent: Optional[MarketPriceAgent] = None, onboarding_agent: Optional[OnboardingAgent] = None, climate_agent: Optional[ClimateAgent] = None):
         self.supported_intents = ["irrigation", "spoilage", "climate", "subsidy", "market_price"]
         self.irrigation_agent = irrigation_agent
         self.spoilage_agent = spoilage_agent
         self.subsidy_agent = subsidy_agent
         self.market_price_agent = market_price_agent
         self.onboarding_agent = onboarding_agent
+        self.climate_agent = climate_agent
         
         # Simple keyword matching for MVP routing
         self.keywords = {
@@ -104,6 +106,9 @@ class IntentRouter:
                 
             elif intent == "market_price" and self.market_price_agent:
                 response = await self.market_price_agent.process_request(request)
+                
+            elif intent == "climate" and self.climate_agent:
+                response = await self.climate_agent.process_request(request)
                 
         except Exception as e:
             logger.error(f"Agent processing failed for {intent}: {e}")
