@@ -1,0 +1,22 @@
+# Environments and Secrets
+.env
+.venv/
+env/
+venv/
+
+# Python Cache
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Testing
+.pytest_cache/
+.coverage
+
+# Editor Configuration
+.vscode/
+
+# OS generated files
+.DS_Store
+Thumbs.db
