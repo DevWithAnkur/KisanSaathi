@@ -1,19 +1,19 @@
-import time
 import logging
 import redis.asyncio as redis
 
 from src.core.config import settings
+from typing import Optional
 
 logger = logging.getLogger(__name__)
 
 
 class SessionManager:
-    def __init__(self, redis_url: str = None):
+    def __init__(self, redis_url: Optional[str] = None):
         self.redis_url = redis_url or settings.redis_url
         self._client = None
         self._redis_available = False
         # Fallback in-memory store
-        self._memory_store = {}
+        self._memory_store = {}  # type: ignore
         # TTL for session data (24 hours)
         self.session_ttl = 86400
 
@@ -48,7 +48,9 @@ class SessionManager:
                     await client.expire(key, self.session_ttl)
                 return count
             except Exception as e:
-                logger.warning(f"Redis error during increment_failure_count, falling back to memory: {e}")
+                logger.warning(
+                    f"Redis error during increment_failure_count, falling back to memory: {e}"
+                )
                 self._redis_available = False
                 # Fall through to memory store
 
@@ -62,13 +64,14 @@ class SessionManager:
         Resets the failure count after a successful classification or fallback.
         """
         key = f"session_failures:{farmer_id}"
-        
+
         # Try Redis first
         if self._redis_available and self._client:
             try:
                 # This is async but we're in a sync method - we can't await here
                 # Schedule the deletion for the next event loop iteration
                 import asyncio
+
                 try:
                     loop = asyncio.get_event_loop()
                     if loop.is_running():

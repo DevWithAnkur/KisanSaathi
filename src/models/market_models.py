@@ -2,6 +2,7 @@ from pydantic import BaseModel
 from typing import Optional
 from datetime import datetime
 
+
 class MarketPrice(BaseModel):
     crop: str
     state: str

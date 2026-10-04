@@ -7,55 +7,64 @@ from src.core.database import Base
 
 # A static key for MVP, normally loaded from env
 # E.g. Fernet.generate_key() -> b'x_...'
-ENCRYPTION_KEY = os.environ.get("ENCRYPTION_KEY", b'lR9N4tG8B6y-h0rN4_6wP3wzQc5JpA7bM2mZ_H8V4Xw=')
+ENCRYPTION_KEY = os.environ.get(
+    "ENCRYPTION_KEY", b"lR9N4tG8B6y-h0rN4_6wP3wzQc5JpA7bM2mZ_H8V4Xw="
+)
 fernet = Fernet(ENCRYPTION_KEY)
+
 
 class EncryptedString(TypeDecorator):
     """
     Transparently encrypts and decrypts strings on the way in and out of the DB.
     """
+
     impl = String
     cache_ok = True
 
     def process_bind_param(self, value, dialect):
         if value is not None:
-            return fernet.encrypt(value.encode('utf-8')).decode('utf-8')
+            return fernet.encrypt(value.encode("utf-8")).decode("utf-8")
         return value
 
     def process_result_value(self, value, dialect):
         if value is not None:
-            return fernet.decrypt(value.encode('utf-8')).decode('utf-8')
+            return fernet.decrypt(value.encode("utf-8")).decode("utf-8")
         return value
+
 
 class FarmerProfileDB(Base):
     __tablename__ = "farmer_profiles"
 
     # phone_number is used as the primary key/ID for the farmer
     phone_number = Column(String, primary_key=True, index=True)
-    
+
     # Consent flag (FR-27)
     consent_given = Column(Boolean, default=False, nullable=False)
-    
+
     # State tracking for the onboarding flow
-    onboarding_step = Column(String, default="consent") # consent -> location -> crop -> details -> pump -> complete
-    
+    onboarding_step = Column(
+        String, default="consent"
+    )  # consent -> location -> crop -> details -> pump -> complete
+
     # Encrypted fields
     state = Column(EncryptedString, nullable=True)
     district = Column(EncryptedString, nullable=True)
     crop = Column(EncryptedString, nullable=True)
-    land_size_ha = Column(EncryptedString, nullable=True) # Stored as string to simplify encryption
+    land_size_ha = Column(
+        EncryptedString, nullable=True
+    )  # Stored as string to simplify encryption
     category = Column(EncryptedString, nullable=True)
     harvest_date = Column(EncryptedString, nullable=True)
-    
+
     # Pump info for energy estimates (FR-8a) - optional
     pump_type = Column(EncryptedString, nullable=True)  # "diesel" or "electric"
-    motor_hp = Column(Float, nullable=True)             # Motor horsepower
-    
+    motor_hp = Column(Float, nullable=True)  # Motor horsepower
+
     # Alert preferences
     alert_opt_in = Column(Boolean, default=False, nullable=False)
-    
+
     # Preferred language (for responses)
     language = Column(String, default="en", nullable=False)
-    
+
     created_at = Column(DateTime, default=datetime.utcnow)
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)

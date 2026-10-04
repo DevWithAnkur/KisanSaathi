@@ -1,20 +1,20 @@
 import logging
 import json
-import os
 from pathlib import Path
-from typing import Dict
+from typing import Optional, Dict
 
 logger = logging.getLogger(__name__)
 
+
 class TranslationClient:
-    def __init__(self, glossary_path: str = None):
+    def __init__(self, glossary_path: Optional[str] = None):
         if not glossary_path:
             base_dir = Path(__file__).parent.parent
-            glossary_path = base_dir / "data" / "agri_glossary.json"
-            
+            glossary_path = base_dir / "data" / "agri_glossary.json"  # type: ignore
+
         self.glossary: Dict[str, Dict[str, str]] = {}
         try:
-            with open(glossary_path, "r", encoding="utf-8") as f:
+            with open(glossary_path, "r", encoding="utf-8") as f:  # type: ignore
                 self.glossary = json.load(f)
         except Exception as e:
             logger.error(f"Failed to load glossary: {e}")
@@ -26,22 +26,24 @@ class TranslationClient:
         """
         if target_lang == "en":
             return text
-            
+
         # 1. Attempt API translation with retries
         translated_text = None
         for attempt in range(retries + 1):
             try:
                 # Mock API call to Bhashini/GCP
                 translated_text = self._mock_api_call(text, target_lang)
-                break # Success
+                break  # Success
             except Exception as e:
                 logger.warning(f"Translation API attempt {attempt+1} failed: {e}")
-                
+
         # 2. Fallback to English if API completely fails
         if not translated_text:
-            logger.error(f"Translation to {target_lang} failed after {retries} retries. Falling back to English.")
+            logger.error(
+                f"Translation to {target_lang} failed after {retries} retries. Falling back to English."
+            )
             return text
-            
+
         # 3. Fine-tuning: Post-process with agri glossary
         return self._apply_glossary(translated_text, target_lang)
 
@@ -50,7 +52,7 @@ class TranslationClient:
         # For MVP testing, if "simulate_failure" is in text, raise Exception
         if "simulate_failure" in text:
             raise ConnectionError("Mock Bhashini API timeout")
-            
+
         # In a real app, this would be a httpx.AsyncClient post to Bhashini
         if target_lang == "hi":
             return f"[HI] {text}"
@@ -64,11 +66,11 @@ class TranslationClient:
         glossary_key = f"en_to_{target_lang}"
         if glossary_key not in self.glossary:
             return text
-            
+
         dict_map = self.glossary[glossary_key]
         for en_word, local_word in dict_map.items():
             # Basic replacement
             text = text.replace(en_word, local_word)
             text = text.replace(en_word.capitalize(), local_word)
-            
+
         return text
