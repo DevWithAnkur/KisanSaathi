@@ -29,7 +29,9 @@ class SecretsManagerClient:
     Falls back to environment variables for local development.
     """
 
-    def __init__(self, region: Optional[str] = None, secret_prefix: str = "kisan-saathi/"):
+    def __init__(
+        self, region: Optional[str] = None, secret_prefix: str = "kisan-saathi/"
+    ):
         self.region = region or os.getenv("AWS_REGION", "ap-south-1")
         self.secret_prefix = secret_prefix
         self._client = None
@@ -76,9 +78,7 @@ class SecretsManagerClient:
             except ClientError as e:
                 error_code = e.response["Error"]["Code"]
                 if error_code == "ResourceNotFoundException":
-                    logger.debug(
-                        f"Secret '{cfg_key}' not found in AWS Secrets Manager"
-                    )
+                    logger.debug(f"Secret '{cfg_key}' not found in AWS Secrets Manager")
                 else:
                     logger.warning(f"Failed to get secret '{cfg_key}': {e}")
             except Exception as e:

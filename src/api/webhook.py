@@ -53,7 +53,9 @@ def detect_language(text: str, profile_language: Optional[str] = None) -> str:
 # Idempotency key management (duplicate message detection)
 _idempotency_redis = None
 _idempotency_redis_available = False
-_idempotency_memory: dict[str, float] = {}  # fallback: {msg_id: expiry_timestamp}  # type: ignore
+_idempotency_memory: dict[str, float] = (
+    {}
+)  # fallback: {msg_id: expiry_timestamp}  # type: ignore
 IDEMPOTENCY_TTL = 86400  # 24 hours
 
 

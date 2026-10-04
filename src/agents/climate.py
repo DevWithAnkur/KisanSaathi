@@ -88,4 +88,3 @@ class ClimateAgent:
             response_timestamp=datetime.utcnow(),
             **kwargs,
         )
-

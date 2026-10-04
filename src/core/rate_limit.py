@@ -11,7 +11,10 @@ logger = logging.getLogger(__name__)
 
 class RateLimiter:
     def __init__(
-        self, redis_url: Optional[str] = None, limit: Optional[int] = None, window_secs: Optional[int] = None
+        self,
+        redis_url: Optional[str] = None,
+        limit: Optional[int] = None,
+        window_secs: Optional[int] = None,
     ):
         self.limit = limit or settings.rate_limit_requests
         self.window_secs = window_secs or settings.rate_limit_window_secs
@@ -35,7 +38,9 @@ class RateLimiter:
                 self._client = None
         return self._client
 
-    async def check_rate_limit(self, farmer_id: str, client_ip: Optional[str] = None) -> bool:
+    async def check_rate_limit(
+        self, farmer_id: str, client_ip: Optional[str] = None
+    ) -> bool:
         """
         Check if a farmer (by phone number) has exceeded the rate limit.
         Uses a sliding window algorithm with Redis sorted sets when available,
@@ -111,7 +116,11 @@ class RateLimiter:
         return results[2]  # zcard result
 
     def _check_bucket_memory(
-        self, farmer_key: str, window_start: float, now: float, ip_key: Optional[str] = None
+        self,
+        farmer_key: str,
+        window_start: float,
+        now: float,
+        ip_key: Optional[str] = None,
     ) -> bool:
         """In-memory fallback rate limiting."""
         # Clean expired entries
