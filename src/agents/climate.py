@@ -31,6 +31,7 @@ class ClimateAgent:
 
         # Anomaly Logic
         max_temp = weather_data.forecast.max_temperature_c
+        min_temp = weather_data.forecast.min_temperature_c
         total_rain = weather_data.forecast.total_rainfall_48h_mm
         
         alert_msg_en = ""
@@ -43,6 +44,11 @@ class ClimateAgent:
         if total_rain and total_rain > 50.0:
             alert_msg_en += f"HEAVY RAIN WARNING: {total_rain}mm of rain is expected. Clear drainage channels to prevent waterlogging. "
             alert_msg_hi += f"भारी बारिश की चेतावनी: {total_rain} मिमी बारिश होने की उम्मीद है। जलभराव को रोकने के लिए जल निकासी चैनलों को साफ करें। "
+            
+        # Frost risk detection (FR-12, Item 18)
+        if min_temp is not None and min_temp < 2.0:
+            alert_msg_en += f"FROST WARNING: Temperatures may drop to {min_temp}°C. Protect sensitive crops with covers or irrigation. "
+            alert_msg_hi += f"पाला चेतावनी: तापमान {min_temp}°C तक गिर सकता है। संवेदनशील फसलों को कवर या सिंचाई से सुरक्षित रखें। "
             
         if not alert_msg_en:
             text_en = "There are currently no extreme climate alerts for your region."
@@ -59,6 +65,15 @@ class ClimateAgent:
             source_name=weather_data.source,
             source_timestamp=weather_data.retrieved_at,
             verification_status="verified",
+        )
+
+    def _build_response(self, request: AgentRequest, text: str, **kwargs) -> AgentResponse:
+        return AgentResponse(
+            text=text,
+            agent_name="ClimateAgent",
+            intent="climate",
+            response_timestamp=datetime.utcnow(),
+            **kwargs
         )
 
     def _build_response(self, request: AgentRequest, text: str, **kwargs) -> AgentResponse:

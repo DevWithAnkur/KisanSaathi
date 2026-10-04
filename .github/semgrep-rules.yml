@@ -1,0 +1,89 @@
+# Semgrep custom rules for KisanSaathi
+# This file can be referenced in the CI workflow for additional custom checks
+
+rules:
+  # Custom rule: Prevent hardcoded secrets
+  - id: no-hardcoded-secrets
+    pattern-either:
+      - pattern: $X = "sk_live_..."
+      - pattern: $X = "pk_live_..."
+      - pattern: $X = "Bearer ..."
+      - pattern: $X = "sk_test_..."
+    message: "Possible hardcoded secret detected. Use environment variables or secrets manager."
+    languages: [python]
+    severity: ERROR
+    metadata:
+      category: security
+      confidence: HIGH
+
+  # Custom rule: Ensure SQL queries use parameterization (not f-strings)
+  - id: sql-injection-risk
+    pattern-either:
+      - pattern: execute(f"...{$VAR}...")
+      - pattern: execute("..." + $VAR + "...")
+      - pattern: cursor.execute(f"...{$VAR}...")
+      - pattern: cursor.execute("..." + $VAR + "...")
+    message: "Potential SQL injection risk. Use parameterized queries instead of string interpolation."
+    languages: [python]
+    severity: WARNING
+    metadata:
+      category: security
+      confidence: MEDIUM
+
+  # Custom rule: Ensure async functions are awaited
+  - id: missing-await
+    pattern: $FUNC(...)
+    metavariable-regex:
+      metavariable: $FUNC
+      regex: ".*_async$|^async_.*|.*_await$"
+    message: "Async function called without await. This may indicate a bug."
+    languages: [python]
+    severity: WARNING
+    metadata:
+      category: correctness
+      confidence: LOW
+
+  # Custom rule: Prevent logging sensitive data
+  - id: no-logging-secrets
+    pattern-either:
+      - pattern: logger.info(f"...{$SECRET}...")
+      - pattern: logger.debug(f"...{$SECRET}...")
+      - pattern: logger.warning(f"...{$SECRET}...")
+      - pattern: logger.error(f"...{$SECRET}...")
+      - pattern: logger.info("..." + $SECRET + "...")
+      - pattern: print(f"...{$SECRET}...")
+    metavariable-regex:
+      metavariable: $SECRET
+      regex: ".*(password|secret|token|key|api_key|auth).*"
+    message: "Possible logging of sensitive data. Avoid logging passwords, tokens, or API keys."
+    languages: [python]
+    severity: WARNING
+    metadata:
+      category: security
+      confidence: MEDIUM
+
+  # Custom rule: Ensure error handling for external API calls
+  - id: missing-external-api-error-handling
+    pattern-either:
+      - pattern: await httpx.AsyncClient().$METHOD(...)
+      - pattern: await httpx.Client().$METHOD(...)
+      - pattern: requests.$METHOD(...)
+    metavariable-regex:
+      metavariable: $METHOD
+      regex: "get|post|put|patch|delete"
+    message: "External API call without explicit error handling. Consider adding try/except for httpx.RequestError, httpx.HTTPStatusError."
+    languages: [python]
+    severity: WARNING
+    metadata:
+      category: reliability
+      confidence: LOW
+
+  # Custom rule: Ensure database connections are properly closed
+  - id: db-connection-leak
+    pattern: $SESSION = AsyncSessionLocal()
+    message: "Database session created. Ensure it's properly closed with async context manager or try/finally."
+    languages: [python]
+    severity: WARNING
+    metadata:
+      category: reliability
+      confidence: LOW

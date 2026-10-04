@@ -1,5 +1,5 @@
 import os
-from sqlalchemy import Column, String, Boolean, DateTime
+from sqlalchemy import Column, String, Boolean, DateTime, Float
 from sqlalchemy.types import TypeDecorator
 from cryptography.fernet import Fernet
 from datetime import datetime
@@ -37,7 +37,7 @@ class FarmerProfileDB(Base):
     consent_given = Column(Boolean, default=False, nullable=False)
     
     # State tracking for the onboarding flow
-    onboarding_step = Column(String, default="consent") # consent -> location -> crop -> details -> complete
+    onboarding_step = Column(String, default="consent") # consent -> location -> crop -> details -> pump -> complete
     
     # Encrypted fields
     state = Column(EncryptedString, nullable=True)
@@ -46,6 +46,16 @@ class FarmerProfileDB(Base):
     land_size_ha = Column(EncryptedString, nullable=True) # Stored as string to simplify encryption
     category = Column(EncryptedString, nullable=True)
     harvest_date = Column(EncryptedString, nullable=True)
+    
+    # Pump info for energy estimates (FR-8a) - optional
+    pump_type = Column(EncryptedString, nullable=True)  # "diesel" or "electric"
+    motor_hp = Column(Float, nullable=True)             # Motor horsepower
+    
+    # Alert preferences
+    alert_opt_in = Column(Boolean, default=False, nullable=False)
+    
+    # Preferred language (for responses)
+    language = Column(String, default="en", nullable=False)
     
     created_at = Column(DateTime, default=datetime.utcnow)
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)

@@ -3,16 +3,12 @@ from fastapi.responses import Response
 import logging
 import uuid
 
-# In a real app, these would be properly injected dependencies
-from src.agents.router import IntentRouter
+from src.agents.router import intent_router
 from src.core.database import get_db
 from src.models.contracts import AgentRequest
 
 logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/ivr", tags=["IVR"])
-
-# Placeholder for the global router instance which would normally be injected
-intent_router = IntentRouter()
 
 def generate_twiml(text: str, gather: bool = False) -> str:
     """Helper to generate basic Twilio TwiML XML."""
@@ -39,6 +35,7 @@ async def ivr_incoming(request: Request):
 async def ivr_process(request: Request, db=Depends(get_db)):
     """
     Processes the transcribed voice from the Twilio <Gather> verb.
+    Uses the same shared IntentRouter instance as WhatsApp webhook.
     """
     form_data = await request.form()
     caller_id = form_data.get("From", "Unknown")
@@ -49,20 +46,19 @@ async def ivr_process(request: Request, db=Depends(get_db)):
     if not speech_result:
         return Response(content=generate_twiml("I didn't catch that. Please try calling again later."), media_type="application/xml")
         
-    # Route through the same pipeline as WhatsApp
+    # Route through the same pipeline as WhatsApp using shared intent_router
     intent = intent_router.classify_intent(speech_result)
     
     agent_request = AgentRequest(
         farmer_id=caller_id,
         session_id=caller_id,
         message_id=str(uuid.uuid4()),
-        language="en",
+        language="en",  # IVR typically uses English for MVP; could detect from SpeechResult if Twilio supports
         query_text=speech_result,
         correlation_id=str(uuid.uuid4())
     )
     
-    # Process request
-    # Note: Using mock empty router here because dependencies are not wired globally.
+    # Process request using shared router with real agents
     response = await intent_router.process_request(intent, agent_request, db)
     
     return Response(content=generate_twiml(response.text, gather=False), media_type="application/xml")

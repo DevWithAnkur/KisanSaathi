@@ -1,0 +1,96 @@
+# Dependabot configuration for automated dependency updates
+# See: https://docs.github.com/en/code-security/dependabot/dependabot-version-updates/configuration-options-for-the-dependabot.yml-file
+
+version: 2
+updates:
+  # Python dependencies (pip)
+  - package-ecosystem: "pip"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "09:00"
+      timezone: "Asia/Kolkata"
+    labels:
+      - "dependencies"
+      - "python"
+    commit-message:
+      prefix: "[deps] "
+      include: "scope"
+    open-pull-requests-limit: 10
+    reviewers:
+      - "team-leads"
+    assignees:
+      - "backend-owner"
+    # Group related updates together
+    groups:
+      django:
+        patterns:
+          - "django*"
+      pytest:
+        patterns:
+          - "pytest*"
+      sqlalchemy:
+        patterns:
+          - "sqlalchemy*"
+          - "asyncpg*"
+          - "psycopg*"
+      redis:
+        patterns:
+          - "redis*"
+      fastapi:
+        patterns:
+          - "fastapi*"
+          - "starlette*"
+          - "uvicorn*"
+      pydantic:
+        patterns:
+          - "pydantic*"
+      security:
+        patterns:
+          - "cryptography*"
+          - "httpx*"
+      testing:
+        patterns:
+          - "pytest*"
+          - "coverage*"
+    # Auto-merge patch/minor updates that pass CI
+    allow:
+      - dependency-type: "direct"
+        update-type: "version-update:semver-patch"
+      - dependency-type: "direct"
+        update-type: "version-update:semver-minor"
+    ignore:
+      - dependency-name: "*"
+        update-type: "version-update:semver-major"
+
+  # GitHub Actions
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "09:00"
+      timezone: "Asia/Kolkata"
+    labels:
+      - "dependencies"
+      - "github-actions"
+    commit-message:
+      prefix: "[deps] "
+      include: "scope"
+    open-pull-requests-limit: 5
+
+  # Docker base images
+  - package-ecosystem: "docker"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "09:00"
+      timezone: "Asia/Kolkata"
+    labels:
+      - "dependencies"
+      - "docker"
+    commit-message:
+      prefix: "[deps] "
+      include: "scope"

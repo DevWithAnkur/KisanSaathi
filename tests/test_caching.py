@@ -1,9 +1,11 @@
 import pytest
-from unittest.mock import AsyncMock, patch
+from unittest.mock import AsyncMock, patch, MagicMock
+from datetime import datetime
 
 from src.models.contracts import AgentRequest, AgentResponse
 from src.agents.router import IntentRouter
 from src.agents.spoilage import SpoilageAgent
+from src.core.cache import CachedAdvisory
 
 @pytest.fixture
 def mock_spoilage_agent():
@@ -39,8 +41,12 @@ async def test_successful_response_is_cached(mock_cache, intent_router, mock_spo
     # We pass None for db so it bypasses the real db logic in test
     response = await intent_router.process_request("spoilage", request, db=None)
     
-    # Verify cache was SET
-    mock_cache.set_last_advisory.assert_called_once_with("+91111222333", "spoilage", "Safe to store.")
+    # Verify cache was SET with new signature (text, source_name, source_timestamp)
+    mock_cache.set_last_advisory.assert_called_once()
+    call_args = mock_cache.set_last_advisory.call_args
+    assert call_args[0][0] == "+91111222333"  # farmer_id
+    assert call_args[0][1] == "spoilage"  # intent
+    assert call_args[0][2] == "Safe to store."  # text
     assert response.text == "Safe to store."
 
 @pytest.mark.asyncio
@@ -51,8 +57,17 @@ async def test_failed_agent_falls_back_to_cache(mock_cache, intent_router, mock_
         text="Weather API is down.", agent_name="Spoilage", intent="spoilage", verification_status="failed", safe_fallback=True
     )
     
-    # Setup cache to return old data
-    mock_cache.get_last_advisory.return_value = "Safe to store (from yesterday)."
+    # Setup cache to return old data with new CachedAdvisory object
+    cached_advisory = CachedAdvisory(
+        text="Safe to store (from yesterday).",
+        source_name="TestSource",
+        source_timestamp=datetime.utcnow(),
+        cache_timestamp=datetime.utcnow(),
+        cache_age_seconds=3600
+    )
+    mock_cache.get_last_advisory.return_value = cached_advisory
+    # Make compare_and_flag_conflict return None (no conflict)
+    mock_cache.compare_and_flag_conflict = AsyncMock(return_value=None)
     
     request = build_request()
     response = await intent_router.process_request("spoilage", request, db=None)

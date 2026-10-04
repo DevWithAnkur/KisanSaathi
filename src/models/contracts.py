@@ -12,6 +12,11 @@ class AgentRequest(BaseModel):
     timestamp: datetime = Field(default_factory=datetime.utcnow, description="Request arrival time")
     correlation_id: str = Field(..., description="Log correlation ID")
 
+class EnergySavedInfo(BaseModel):
+    energy_saved: float = Field(..., description="Amount of energy saved")
+    unit: str = Field(..., description="Unit of energy (liters of diesel, kWh)")
+    description: str = Field(..., description="Human-readable description")
+
 class AgentResponse(BaseModel):
     text: str = Field(..., description="Short farmer-facing response text")
     audio_payload: Optional[str] = Field(default=None, description="Optional audio file URL or base64")
@@ -25,11 +30,13 @@ class AgentResponse(BaseModel):
     cache_status: str = Field(default="miss", description="'hit' or 'miss'")
     cache_age_seconds: Optional[int] = Field(default=None, description="Age of cached data if cache_status is 'hit'")
     safe_fallback: bool = Field(default=False, description="True if response is a safe fallback due to error")
+    energy_saved: Optional[EnergySavedInfo] = Field(default=None, description="Energy saved by skipping irrigation (FR-8a)")
 
 
 # Compatibility models for callers using the original climate contract names.
 class ForecastData(BaseModel):
     max_temperature_c: Optional[float] = None
+    min_temperature_c: Optional[float] = None
     total_rainfall_48h_mm: float = 0.0
 
 

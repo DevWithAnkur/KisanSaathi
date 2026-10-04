@@ -9,18 +9,126 @@
     "next_action": "Visit your nearest CSC with your Aadhaar and land record to register",
     "source": "PM-KISAN portal (pmkisan.gov.in)",
     "last_updated": "2026-08-01T00:00:00Z",
-    "dataset_version": "1.0"
+    "dataset_version": "2.0"
   },
   {
     "name": "PMFBY (Crop Insurance)",
     "state_scope": "national",
-    "eligible_crops": ["wheat", "rice", "cotton", "soybean"],
+    "eligible_crops": ["wheat", "rice", "cotton", "soybean", "maize", "groundnut", "mustard"],
     "max_land_size_ha": null,
-    "categories": ["all", "small", "marginal"],
-    "benefit": "Insurance cover against crop failure due to natural calamities",
+    "categories": ["all", "small", "marginal", "large"],
+    "benefit": "Insurance cover against crop failure due to natural calamities, pests, and diseases",
     "next_action": "Enroll through your bank branch, CSC, or pmfby.gov.in before the sowing season deadline",
     "source": "PMFBY portal (pmfby.gov.in)",
     "last_updated": "2026-08-01T00:00:00Z",
-    "dataset_version": "1.0"
+    "dataset_version": "2.0"
+  },
+  {
+    "name": "KCC (Kisan Credit Card)",
+    "state_scope": "national",
+    "eligible_crops": [],
+    "max_land_size_ha": null,
+    "categories": ["small", "marginal", "large"],
+    "benefit": "Short-term credit limit up to ₹3 lakh at 4% interest (with interest subvention)",
+    "next_action": "Apply at your bank branch or CSC with land records and ID proof",
+    "source": "KCC scheme (pmkisan.gov.in/kcc)",
+    "last_updated": "2026-08-01T00:00:00Z",
+    "dataset_version": "2.0"
+  },
+  {
+    "name": "PM Kusum (Solar Pump Scheme)",
+    "state_scope": "national",
+    "eligible_crops": [],
+    "max_land_size_ha": null,
+    "categories": ["small", "marginal", "large"],
+    "benefit": "Subsidy up to 60% for solar pump installation (30% central + 30% state), remaining 40% loan",
+    "next_action": "Apply through state renewable energy department portal or CSC",
+    "source": "MNRE PM-KUSUM portal (mnre.gov.in)",
+    "last_updated": "2026-08-01T00:00:00Z",
+    "dataset_version": "2.0"
+  },
+  {
+    "name": "Soil Health Card Scheme",
+    "state_scope": "national",
+    "eligible_crops": [],
+    "max_land_size_ha": null,
+    "categories": ["all", "small", "marginal", "large"],
+    "benefit": "Free soil testing and nutrient recommendation card every 2 years",
+    "next_action": "Contact your district agriculture office or KVK for soil sample collection",
+    "source": "Soil Health Card portal (soilhealth.dac.gov.in)",
+    "last_updated": "2026-08-01T00:00:00Z",
+    "dataset_version": "2.0"
+  },
+  {
+    "name": "Maharashtra - Chief Minister Agriculture Solar Feeder Scheme",
+    "state_scope": "Maharashtra",
+    "eligible_crops": [],
+    "max_land_size_ha": 5.0,
+    "categories": ["small", "marginal"],
+    "benefit": "Free solar-powered agriculture feeder connection for day-time irrigation",
+    "next_action": "Apply at MSEDCL office or through mahavitaran.in portal",
+    "source": "Maharashtra Energy Department (mahaurja.com)",
+    "last_updated": "2026-08-01T00:00:00Z",
+    "dataset_version": "2.0"
+  },
+  {
+    "name": "Punjab - Pani Bachao Paise Kamao Scheme",
+    "state_scope": "Punjab",
+    "eligible_crops": ["rice", "wheat"],
+    "max_land_size_ha": 10.0,
+    "categories": ["small", "marginal", "large"],
+    "benefit": "Incentive of ₹1,500 per acre for direct seeded rice (DSR) water saving",
+    "next_action": "Register with Punjab Agriculture Department before paddy season",
+    "source": "Punjab Agriculture Department (agripunjab.gov.in)",
+    "last_updated": "2026-08-01T00:00:00Z",
+    "dataset_version": "2.0"
+  },
+  {
+    "name": "Karnataka - Raitha Siri Scheme",
+    "state_scope": "Karnataka",
+    "eligible_crops": ["millets", "ragi", "jowar", "bajra"],
+    "max_land_size_ha": 5.0,
+    "categories": ["small", "marginal"],
+    "benefit": "₹10,000 per hectare incentive for millet cultivation",
+    "next_action": "Register at Raitha Samparka Kendra or karnataka.gov.in",
+    "source": "Karnataka Agriculture Department (raitamitra.karnataka.gov.in)",
+    "last_updated": "2026-08-01T00:00:00Z",
+    "dataset_version": "2.0"
+  },
+  {
+    "name": "Tamil Nadu - Uzhavar Pathukappu Thittam",
+    "state_scope": "Tamil Nadu",
+    "eligible_crops": [],
+    "max_land_size_ha": 2.0,
+    "categories": ["small", "marginal"],
+    "benefit": "Comprehensive insurance coverage for farmers aged 18-60, premium paid by state",
+    "next_action": "Enroll at Primary Agriculture Cooperative Society (PACS) or TN agriculture portal",
+    "source": "TN Agriculture Department (tn.gov.in/agriculture)",
+    "last_updated": "2026-08-01T00:00:00Z",
+    "dataset_version": "2.0"
+  },
+  {
+    "name": "Uttar Pradesh - Mukhyamantri Krishak Durghatna Kalyan Yojana",
+    "state_scope": "Uttar Pradesh",
+    "eligible_crops": [],
+    "max_land_size_ha": null,
+    "categories": ["all", "small", "marginal", "large"],
+    "benefit": "₹5 lakh compensation for accidental death/disability of registered farmer",
+    "next_action": "Register at district agriculture office or upagripardarshi.gov.in",
+    "source": "UP Agriculture Department (upagriculture.com)",
+    "last_updated": "2026-08-01T00:00:00Z",
+    "dataset_version": "2.0"
+  },
+  {
+    "name": "Gujarat - Krushi Sahay Yojana",
+    "state_scope": "Gujarat",
+    "eligible_crops": ["cotton", "groundnut", "castor", "cumin"],
+    "max_land_size_ha": 4.0,
+    "categories": ["small", "marginal"],
+    "benefit": "Subsidy on seeds, fertilizers, and micro-irrigation equipment up to ₹25,000",
+    "next_action": "Apply at i-Khedut portal (ikhedut.gujarat.gov.in) or Gram Seva Kendra",
+    "source": "Gujarat Agriculture Department (agri.gujarat.gov.in)",
+    "last_updated": "2026-08-01T00:00:00Z",
+    "dataset_version": "2.0"
   }
 ]
